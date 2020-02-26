@@ -9,6 +9,7 @@ We use LINE to implement the chatbot
     Implementation: such as alice bot and aiml
 
 2. Health topic
+   health care
 
 3. Coronavirus disease
 
