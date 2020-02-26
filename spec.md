@@ -21,10 +21,10 @@ Implementation: such as alice bot and aiml
 
 3. Coronavirus disease
 
-  This function is related to the hot topic Coronavirus disease (COVID-19). The chatbox could reply the message based on the news website and official data. 
-  The content includes the existing number of patients, the measurement of preventing coronavirus, the correct operation of wearing face mask properly and the like.
+   This function is related to the hot topic Coronavirus disease (COVID-19). The chatbox could reply the message based on the news website and official data. 
+   The content includes the existing number of patients, the measurement of preventing coronavirus, the correct operation of wearing face mask properly and the like.
 
 4. Coronavirus diagnosis
 
-  We will endevour to implement this function. When the users input the message about their symptoms and some basic information, such as age, gender and whether he/she has been to Wuhan in the past 14 days. 
-  Based on the users’ information, the chatbox will tell the likelihood that he or she suffers from the coronavirus disease.
+   We will endevour to implement this function. When the users input the message about their symptoms and some basic information, such as age, gender and whether he/she has been to Wuhan in the past 14 days. 
+   Based on the users’ information, the chatbox will tell the likelihood that he or she suffers from the coronavirus disease.
