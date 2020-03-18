@@ -4,7 +4,7 @@ import os
 import sys
 import redis
 import aiml
-
+import json
 from argparse import ArgumentParser
 
 from flask import Flask, request, abort
@@ -15,11 +15,13 @@ from linebot.exceptions import (
     InvalidSignatureError
 )
 
-from linebot.models import (RichMenu,RichMenuArea,RichMenuBounds,RichMenuSize,URIAction,
-    MessageEvent, TextMessage, TextSendMessage, ImageMessage, VideoMessage, FileMessage, StickerMessage, StickerSendMessage,
-BubbleContainer,TextComponent,BoxComponent,IconComponent,FlexSendMessage,SpacerComponent,ButtonComponent,SeparatorComponent
-,ImageComponent,LocationMessage,LocationSendMessage
-)
+from linebot.models import (RichMenu, RichMenuArea, RichMenuBounds, RichMenuSize, URIAction,
+                            MessageEvent, TextMessage, TextSendMessage, ImageMessage, VideoMessage, FileMessage,
+                            StickerMessage, StickerSendMessage,
+                            BubbleContainer, TextComponent, BoxComponent, IconComponent, FlexSendMessage,
+                            SpacerComponent, ButtonComponent, SeparatorComponent
+, ImageComponent, LocationMessage, LocationSendMessage
+                            )
 from linebot.utils import PY3
 
 
@@ -28,15 +30,14 @@ def get_module_dir(name):
     if not path:
         raise AttributeError('module %s has not attribute __file__' % name)
     return os.path.dirname(os.path.abspath(path))
+
+
 alice_path = get_module_dir('aiml') + '/botdata/alice'
-#切换到语料库所在工作目录
+# 切换到语料库所在工作目录
 os.chdir(alice_path)
 alice = aiml.Kernel()
 alice.learn("startup.xml")
 alice.respond('LOAD ALICE')
-
-
-
 
 app = Flask(__name__)
 
@@ -68,6 +69,7 @@ rich_menu_to_create = RichMenu(
 rich_menu_id = line_bot_api.create_rich_menu(rich_menu=rich_menu_to_create)
 print(rich_menu_id)
 
+
 @app.route("/callback", methods=['POST'])
 def callback():
     signature = request.headers['X-Line-Signature']
@@ -96,7 +98,7 @@ def callback():
             handle_FileMessage(event)
         if isinstance(event.message, StickerMessage):
             handle_StickerMessage(event)
-        if isinstance(event.message,LocationMessage):
+        if isinstance(event.message, LocationMessage):
             handle_location_message(event)
 
         if not isinstance(event, MessageEvent):
@@ -106,29 +108,154 @@ def callback():
 
     return 'OK'
 
+
 # Handler function for Text Message
 def handle_TextMessage(event):
-    req=event.message.text
-    if req=='map':
-        bubble = BubbleContainer(
-            direction='ltr',
-            hero=ImageComponent(
-                url='https://www.cdc.gov/coronavirus/2019-ncov/images/outbreak-coronavirus-world.png',
-                size='full',
-                aspect_ratio='2:1',
-                aspect_mode='cover',
-                action=URIAction(uri='https://z.cbndata.com/2019-nCoV/index.html', label='label')
-            ),
-            body=BoxComponent(
-                layout='vertical',
-                contents=[
-                    # title
-                    TextComponent(text='coronavirus map', weight='bold', size='xl'),
-
-                ]
-            ),
-        )
-        message = FlexSendMessage(alt_text="hello", contents=bubble)
+    req = event.message.text
+    if req == 'map':
+        bubble_string = """{
+  "type": "bubble",
+  "hero": {
+    "type": "image",
+    "url": "https://inews.gtimg.com/newsapp_bt/0/11308840372/1000",
+    "size": "full",
+    "aspectRatio": "20:13",
+    "aspectMode": "cover",
+    "action": {
+      "type": "uri",
+      "uri": "https://z.cbndata.com/2019-nCoV/index.html"
+    }
+  },
+  "body": {
+    "type": "box",
+    "layout": "vertical",
+    "contents": [
+      {
+        "type": "separator",
+        "margin": "none"
+      },
+      {
+        "type": "box",
+        "layout": "horizontal",
+        "contents": [
+          {
+            "type": "image",
+            "url": "https://scdn.line-apps.com/n/channel_devcenter/img/fx/01_1_cafe.png",
+            "size": "xs",
+            "aspectRatio": "1:1",
+            "aspectMode": "cover",
+            "align": "start",
+            "position": "relative",
+            "gravity": "center",
+            "flex": 2
+          },
+          {
+            "type": "text",
+            "text": "内地流感情况",
+            "align": "start",
+            "size": "md",
+            "style": "normal",
+            "gravity": "center",
+            "position": "relative",
+            "action": {
+              "type": "uri",
+              "label": "action",
+              "uri": "http://linecorp.com/"
+            },
+            "flex": 5
+          }
+        ]
+      },
+      {
+        "type": "separator"
+      },
+      {
+        "type": "separator",
+        "margin": "md"
+      },
+      {
+        "type": "box",
+        "layout": "horizontal",
+        "contents": [
+          {
+            "type": "image",
+            "url": "https://scdn.line-apps.com/n/channel_devcenter/img/fx/01_1_cafe.png",
+            "size": "xs",
+            "aspectRatio": "1:1",
+            "aspectMode": "cover",
+            "align": "start",
+            "position": "relative",
+            "gravity": "center",
+            "flex": 2
+          },
+          {
+            "type": "text",
+            "text": "国际流感情况",
+            "align": "start",
+            "size": "md",
+            "style": "normal",
+            "gravity": "center",
+            "position": "relative",
+            "action": {
+              "type": "uri",
+              "label": "action",
+              "uri": "http://linecorp.com/"
+            },
+            "flex": 5
+          }
+        ]
+      },
+      {
+        "type": "separator"
+      },
+      {
+        "type": "separator",
+        "margin": "md"
+      },
+      {
+        "type": "box",
+        "layout": "horizontal",
+        "contents": [
+          {
+            "type": "image",
+            "url": "https://scdn.line-apps.com/n/channel_devcenter/img/fx/01_1_cafe.png",
+            "size": "xs",
+            "aspectRatio": "1:1",
+            "aspectMode": "cover",
+            "align": "start",
+            "position": "relative",
+            "gravity": "center",
+            "flex": 2
+          },
+          {
+            "type": "text",
+            "text": "内地流感情况",
+            "align": "start",
+            "size": "md",
+            "style": "normal",
+            "gravity": "center",
+            "position": "relative",
+            "action": {
+              "type": "uri",
+              "label": "action",
+              "uri": "http://linecorp.com/"
+            },
+            "flex": 5
+          }
+        ]
+      },
+      {
+        "type": "separator"
+      }
+    ]
+  },
+  "styles": {
+    "header": {
+      "separator": true
+    }
+  }
+}"""
+        message = FlexSendMessage(alt_text="hello", contents=json.loads(bubble_string))
         line_bot_api.reply_message(
             event.reply_token,
             message
@@ -141,6 +268,7 @@ def handle_TextMessage(event):
             TextSendMessage(msg)
         )
 
+
 # Handler function for Sticker Message
 def handle_StickerMessage(event):
     line_bot_api.reply_message(
@@ -150,26 +278,30 @@ def handle_StickerMessage(event):
             sticker_id=event.message.sticker_id)
     )
 
+
 # Handler function for Image Message
 def handle_ImageMessage(event):
     line_bot_api.reply_message(
-	event.reply_token,
-	TextSendMessage(text="Nice image!")
+        event.reply_token,
+        TextSendMessage(text="Nice image!")
     )
+
 
 # Handler function for Video Message
 def handle_VideoMessage(event):
     line_bot_api.reply_message(
-	event.reply_token,
-	TextSendMessage(text="Nice video!")
+        event.reply_token,
+        TextSendMessage(text="Nice video!")
     )
+
 
 # Handler function for File Message
 def handle_FileMessage(event):
     line_bot_api.reply_message(
-	event.reply_token,
-	TextSendMessage(text="Nice file!")
+        event.reply_token,
+        TextSendMessage(text="Nice file!")
     )
+
 
 def handle_location_message(event):
     line_bot_api.reply_message(
@@ -179,6 +311,8 @@ def handle_location_message(event):
             latitude=event.message.latitude, longitude=event.message.longitude
         )
     )
+
+
 if __name__ == "__main__":
     arg_parser = ArgumentParser(
         usage='Usage: python ' + __file__ + ' [--port <port>] [--help]'
