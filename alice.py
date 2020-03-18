@@ -1,5 +1,3 @@
-
-
 from __future__ import unicode_literals
 
 import os
@@ -97,6 +95,7 @@ def callback():
 # Handler function for Text Message
 def handle_TextMessage(event):
     req=event.message.text
+    print(req)
     msg = alice.respond(req)
     line_bot_api.reply_message(
         event.reply_token,
