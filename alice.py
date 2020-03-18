@@ -18,7 +18,7 @@ from linebot.exceptions import (
 from linebot.models import (RichMenu,RichMenuArea,RichMenuBounds,RichMenuSize,URIAction,
     MessageEvent, TextMessage, TextSendMessage, ImageMessage, VideoMessage, FileMessage, StickerMessage, StickerSendMessage,
 BubbleContainer,TextComponent,BoxComponent,IconComponent,FlexSendMessage,SpacerComponent,ButtonComponent,SeparatorComponent
-,ImageComponent
+,ImageComponent,LocationMessage,LocationSendMessage
 )
 from linebot.utils import PY3
 
@@ -96,6 +96,8 @@ def callback():
             handle_FileMessage(event)
         if isinstance(event.message, StickerMessage):
             handle_StickerMessage(event)
+        if isinstance(event.message,LocationMessage):
+            handle_location_message(event)
 
         if not isinstance(event, MessageEvent):
             continue
@@ -107,13 +109,13 @@ def callback():
 # Handler function for Text Message
 def handle_TextMessage(event):
     req=event.message.text
-    if req=='flex':
+    if req=='map':
         bubble = BubbleContainer(
             direction='ltr',
             hero=ImageComponent(
-                url='https://z.cbndata.com/2019-nCoV/images/banner.png',
+                url='https://www.cdc.gov/coronavirus/2019-ncov/images/outbreak-coronavirus-world.png',
                 size='full',
-                aspect_ratio='20:13',
+                aspect_ratio='2:1',
                 aspect_mode='cover',
                 action=URIAction(uri='https://z.cbndata.com/2019-nCoV/index.html', label='label')
             ),
@@ -121,89 +123,8 @@ def handle_TextMessage(event):
                 layout='vertical',
                 contents=[
                     # title
-                    TextComponent(text='Brown Cafe', weight='bold', size='xl'),
-                    # review
-                    BoxComponent(
-                        layout='baseline',
-                        margin='md',
-                        contents=[
-                            IconComponent(size='sm', url='https://example.com/gold_star.png'),
-                            IconComponent(size='sm', url='https://example.com/grey_star.png'),
-                            IconComponent(size='sm', url='https://example.com/gold_star.png'),
-                            IconComponent(size='sm', url='https://example.com/gold_star.png'),
-                            IconComponent(size='sm', url='https://example.com/grey_star.png'),
-                            TextComponent(text='4.0', size='sm', color='#999999', margin='md',
-                                          flex=0)
-                        ]
-                    ),
-                    # info
-                    BoxComponent(
-                        layout='vertical',
-                        margin='lg',
-                        spacing='sm',
-                        contents=[
-                            BoxComponent(
-                                layout='baseline',
-                                spacing='sm',
-                                contents=[
-                                    TextComponent(
-                                        text='Place',
-                                        color='#aaaaaa',
-                                        size='sm',
-                                        flex=1
-                                    ),
-                                    TextComponent(
-                                        text='Shinjuku, Tokyo',
-                                        wrap=True,
-                                        color='#666666',
-                                        size='sm',
-                                        flex=5
-                                    )
-                                ],
-                            ),
-                            BoxComponent(
-                                layout='baseline',
-                                spacing='sm',
-                                contents=[
-                                    TextComponent(
-                                        text='Time',
-                                        color='#aaaaaa',
-                                        size='sm',
-                                        flex=1
-                                    ),
-                                    TextComponent(
-                                        text="10:00 - 23:00",
-                                        wrap=True,
-                                        color='#666666',
-                                        size='sm',
-                                        flex=5,
-                                    ),
-                                ],
-                            ),
-                        ],
-                    )
-                ],
-            ),
-            footer=BoxComponent(
-                layout='vertical',
-                spacing='sm',
-                contents=[
-                    # callAction, separator, websiteAction
-                    SpacerComponent(size='sm'),
-                    # callAction
-                    ButtonComponent(
-                        style='link',
-                        height='sm',
-                        action=URIAction(label='CALL', uri='tel:000000'),
-                    ),
-                    # separator
-                    SeparatorComponent(),
-                    # websiteAction
-                    ButtonComponent(
-                        style='link',
-                        height='sm',
-                        action=URIAction(label='WEBSITE', uri="https://z.cbndata.com/2019-nCoV/index.html")
-                    )
+                    TextComponent(text='coronavirus map', weight='bold', size='xl'),
+
                 ]
             ),
         )
@@ -250,6 +171,14 @@ def handle_FileMessage(event):
 	TextSendMessage(text="Nice file!")
     )
 
+def handle_location_message(event):
+    line_bot_api.reply_message(
+        event.reply_token,
+        LocationSendMessage(
+            title='Location', address=event.message.address,
+            latitude=event.message.latitude, longitude=event.message.longitude
+        )
+    )
 if __name__ == "__main__":
     arg_parser = ArgumentParser(
         usage='Usage: python ' + __file__ + ' [--port <port>] [--help]'
