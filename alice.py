@@ -15,8 +15,10 @@ from linebot.exceptions import (
     InvalidSignatureError
 )
 
-from linebot.models import (
-    MessageEvent, TextMessage, TextSendMessage, ImageMessage, VideoMessage, FileMessage, StickerMessage, StickerSendMessage
+from linebot.models import (RichMenu,RichMenuArea,RichMenuBounds,RichMenuSize,URIAction,
+    MessageEvent, TextMessage, TextSendMessage, ImageMessage, VideoMessage, FileMessage, StickerMessage, StickerSendMessage,
+BubbleContainer,TextComponent,BoxComponent,IconComponent,FlexSendMessage,SpacerComponent,ButtonComponent,SeparatorComponent
+,ImageComponent
 )
 from linebot.utils import PY3
 
@@ -54,7 +56,17 @@ if channel_access_token is None:
 
 line_bot_api = LineBotApi(channel_access_token)
 parser = WebhookParser(channel_secret)
-
+rich_menu_to_create = RichMenu(
+    size=RichMenuSize(width=2500, height=843),
+    selected=False,
+    name="Nice richmenu",
+    chat_bar_text="Tap here",
+    areas=[RichMenuArea(
+        bounds=RichMenuBounds(x=0, y=0, width=2500, height=843),
+        action=URIAction(label='Go to line.me', uri='https://line.me'))]
+)
+rich_menu_id = line_bot_api.create_rich_menu(rich_menu=rich_menu_to_create)
+print(rich_menu_id)
 
 @app.route("/callback", methods=['POST'])
 def callback():
@@ -95,12 +107,118 @@ def callback():
 # Handler function for Text Message
 def handle_TextMessage(event):
     req=event.message.text
-    print(req)
-    msg = alice.respond(req)
-    line_bot_api.reply_message(
-        event.reply_token,
-        TextSendMessage(msg)
-    )
+    if req=='flex':
+        bubble = BubbleContainer(
+            direction='ltr',
+            hero=ImageComponent(
+                url='https://example.com/cafe.jpg',
+                size='full',
+                aspect_ratio='20:13',
+                aspect_mode='cover',
+                action=URIAction(uri='http://example.com', label='label')
+            ),
+            body=BoxComponent(
+                layout='vertical',
+                contents=[
+                    # title
+                    TextComponent(text='Brown Cafe', weight='bold', size='xl'),
+                    # review
+                    BoxComponent(
+                        layout='baseline',
+                        margin='md',
+                        contents=[
+                            IconComponent(size='sm', url='https://example.com/gold_star.png'),
+                            IconComponent(size='sm', url='https://example.com/grey_star.png'),
+                            IconComponent(size='sm', url='https://example.com/gold_star.png'),
+                            IconComponent(size='sm', url='https://example.com/gold_star.png'),
+                            IconComponent(size='sm', url='https://example.com/grey_star.png'),
+                            TextComponent(text='4.0', size='sm', color='#999999', margin='md',
+                                          flex=0)
+                        ]
+                    ),
+                    # info
+                    BoxComponent(
+                        layout='vertical',
+                        margin='lg',
+                        spacing='sm',
+                        contents=[
+                            BoxComponent(
+                                layout='baseline',
+                                spacing='sm',
+                                contents=[
+                                    TextComponent(
+                                        text='Place',
+                                        color='#aaaaaa',
+                                        size='sm',
+                                        flex=1
+                                    ),
+                                    TextComponent(
+                                        text='Shinjuku, Tokyo',
+                                        wrap=True,
+                                        color='#666666',
+                                        size='sm',
+                                        flex=5
+                                    )
+                                ],
+                            ),
+                            BoxComponent(
+                                layout='baseline',
+                                spacing='sm',
+                                contents=[
+                                    TextComponent(
+                                        text='Time',
+                                        color='#aaaaaa',
+                                        size='sm',
+                                        flex=1
+                                    ),
+                                    TextComponent(
+                                        text="10:00 - 23:00",
+                                        wrap=True,
+                                        color='#666666',
+                                        size='sm',
+                                        flex=5,
+                                    ),
+                                ],
+                            ),
+                        ],
+                    )
+                ],
+            ),
+            footer=BoxComponent(
+                layout='vertical',
+                spacing='sm',
+                contents=[
+                    # callAction, separator, websiteAction
+                    SpacerComponent(size='sm'),
+                    # callAction
+                    ButtonComponent(
+                        style='link',
+                        height='sm',
+                        action=URIAction(label='CALL', uri='tel:000000'),
+                    ),
+                    # separator
+                    SeparatorComponent(),
+                    # websiteAction
+                    ButtonComponent(
+                        style='link',
+                        height='sm',
+                        action=URIAction(label='WEBSITE', uri="https://example.com")
+                    )
+                ]
+            ),
+        )
+        message = FlexSendMessage(alt_text="hello", contents=bubble)
+        line_bot_api.reply_message(
+            event.reply_token,
+            message
+        )
+
+    else:
+        msg = alice.respond(req)
+        line_bot_api.reply_message(
+            event.reply_token,
+            TextSendMessage(msg)
+        )
 
 # Handler function for Sticker Message
 def handle_StickerMessage(event):
