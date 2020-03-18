@@ -111,11 +111,11 @@ def handle_TextMessage(event):
         bubble = BubbleContainer(
             direction='ltr',
             hero=ImageComponent(
-                url='https://example.com/cafe.jpg',
+                url='https://z.cbndata.com/2019-nCoV/images/banner.png',
                 size='full',
                 aspect_ratio='20:13',
                 aspect_mode='cover',
-                action=URIAction(uri='http://example.com', label='label')
+                action=URIAction(uri='https://z.cbndata.com/2019-nCoV/index.html', label='label')
             ),
             body=BoxComponent(
                 layout='vertical',
@@ -202,7 +202,7 @@ def handle_TextMessage(event):
                     ButtonComponent(
                         style='link',
                         height='sm',
-                        action=URIAction(label='WEBSITE', uri="https://example.com")
+                        action=URIAction(label='WEBSITE', uri="https://z.cbndata.com/2019-nCoV/index.html")
                     )
                 ]
             ),
