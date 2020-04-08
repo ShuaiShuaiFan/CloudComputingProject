@@ -7,7 +7,7 @@ import aiml
 import json
 from argparse import ArgumentParser
 
-from flask import Flask, request, abort,render_template
+from flask import Flask, request, abort, render_template
 from linebot import (
     LineBotApi, WebhookParser
 )
@@ -32,14 +32,14 @@ def get_module_dir(name):
     return os.path.dirname(os.path.abspath(path))
 
 
+app = Flask(__name__, template_folder='../templates')
+
 alice_path = get_module_dir('aiml') + '/botdata/alice'
 # 切换到语料库所在工作目录
 os.chdir(alice_path)
 alice = aiml.Kernel()
 alice.learn("startup.xml")
 alice.respond('LOAD ALICE')
-
-app = Flask(__name__)
 
 # get channel_secret and channel_access_token from your environment variable
 channel_secret = os.getenv('LINE_CHANNEL_SECRET', None)
