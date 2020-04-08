@@ -108,9 +108,11 @@ def callback():
 
     return 'OK'
 
-@app.route('/map')
+
+@app.route('/map', methods=['GET'])
 def hello_world():
     return 'Hello World!'
+
 
 # Handler function for Text Message
 def handle_TextMessage(event):
