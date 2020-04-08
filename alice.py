@@ -7,7 +7,7 @@ import aiml
 import json
 from argparse import ArgumentParser
 
-from flask import Flask, request, abort
+from flask import Flask, request, abort,render_template
 from linebot import (
     LineBotApi, WebhookParser
 )
@@ -111,7 +111,7 @@ def callback():
 
 @app.route('/map', methods=['GET'])
 def hello_world():
-    return 'Hello World!'
+    return render_template("map.html")
 
 
 # Handler function for Text Message
