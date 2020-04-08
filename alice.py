@@ -32,6 +32,7 @@ def get_module_dir(name):
     return os.path.dirname(os.path.abspath(path))
 
 
+print(os.path.abspath('../templates'))
 app = Flask(__name__, template_folder=os.path.abspath('../templates'))
 
 alice_path = get_module_dir('aiml') + '/botdata/alice'
