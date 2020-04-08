@@ -165,7 +165,7 @@ def handle_TextMessage(event):
             "action": {
               "type": "uri",
               "label": "action",
-              "uri": "http://linecorp.com/"
+              "uri": "https://healthcarer-project.herokuapp.com/map"
             },
             "flex": 5
           }
