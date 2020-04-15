@@ -4,3 +4,4 @@ line-bot-sdk
 aiml
 bs4
 baidu-aip
+lxml
