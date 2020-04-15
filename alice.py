@@ -326,7 +326,7 @@ def handle_TextMessage(event):
                 "action": {{
                   "type": "uri",
                   "label": "action",
-                  "uri": "0[3]"
+                  "uri": "{0[3]}"
                 }},
                 "flex": 5,
                 "weight": "regular",
@@ -348,8 +348,8 @@ def handle_TextMessage(event):
       }},'''
         news = ""
         for i in variables:
-            new = new.format(i)
-            news += new
+            new2 = new.format(i)
+            news += new2
 
         bubble_string = """
 {{
