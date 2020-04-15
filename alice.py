@@ -471,7 +471,7 @@ def handle_AudioMessage(event):
     res = client.asr(
         message_content, 'm4a',
         16000, {
-            'dev_pid': 1536,
+            'dev_pid': 1737,
         })
     line_bot_api.reply_message(
         event.reply_token,
