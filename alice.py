@@ -288,7 +288,7 @@ def handle_TextMessage(event):
     "aspectMode": "cover",
     "action": {
       "type": "uri",
-      "uri": "https://https://healthcarer-project.herokuapp.com/map"
+      "uri": "https://healthcarer-project.herokuapp.com/map"
     }
   },
   "footer": {
