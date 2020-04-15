@@ -7,6 +7,7 @@ import aiml
 import json
 from argparse import ArgumentParser
 
+
 from flask import Flask, request, abort, render_template
 from linebot import (
     LineBotApi, WebhookParser
@@ -24,6 +25,13 @@ from linebot.models import (RichMenu, RichMenuArea, RichMenuBounds, RichMenuSize
                             )
 from linebot.utils import PY3
 
+
+# 19430124 FAN Shuaishuai 's redis
+HOST = "redis-13670.c8.us-east-1-4.ec2.cloud.redislabs.com"
+PWD = "uOugljWUzWvmfoDuf6CRsonlrfUmYKSD"
+PORT = "13670"
+
+redis1 = redis.Redis(host=HOST, password=PWD, port=PORT)
 
 def get_module_dir(name):
     path = getattr(sys.modules[name], '__file__', None)
@@ -137,18 +145,19 @@ map = '''
 </head>
 <body>
 <div id="container" tabindex="0"></div>
-<script src="https://webapi.amap.com/js/marker.js"></script>
+<script src="//webapi.amap.com/ui/1.0/main.js?v=1.0.11"></script>
 <script src="https://webapi.amap.com/maps?v=1.4.15&key=999bd05545f336fce91acad15209da89"></script>
 <script type="text/javascript">
 
     var map = new AMap.Map('container', {resizeEnable: true, zoom: 4});
     var markers = []; //province见Demo引用的JS文件
+    var provinces={0}
     for (var i = 0; i < provinces.length; i += 1) {
         var marker;
         if (provinces[i].type === 0) {
             var icon = new AMap.Icon({
-                image: 'https://vdata.amap.com/icons/b18/1/2.png',
-                size: new AMap.Size(24, 24)
+                image: 'https://webapi.amap.com/theme/v1.3/markers/n/mark_rs.png',
+                size: new AMap.Size(24, 34)
             });
             marker = new AMap.Marker({
                 icon: icon,
@@ -178,10 +187,37 @@ map = '''
         markers.push(marker);
     }
     map.setFitView();
+    AMap.plugin('AMap.Geolocation', function() {
+  var geolocation = new AMap.Geolocation({
+    // 是否使用高精度定位，默认：true
+    enableHighAccuracy: true,
+    // 设置定位超时时间，默认：无穷大
+    timeout: 10000,
+    // 定位按钮的停靠位置的偏移量，默认：Pixel(10, 20)
+    buttonOffset: new AMap.Pixel(10, 20),
+    //  定位成功后调整地图视野范围使定位位置及精度范围视野内可见，默认：false
+    zoomToAccuracy: true,     
+    //  定位按钮的排放位置,  RB表示右下
+    buttonPosition: 'RB'
+  })
+
+  geolocation.getCurrentPosition()
+  map.addControl(geolocation)
+  AMap.event.addListener(geolocation, 'complete', onComplete)
+  AMap.event.addListener(geolocation, 'error', onError)
+
+  function onComplete (data) {
+    // data是具体的定位信息
+  }
+
+  function onError (data) {
+    // 定位出错
+  }
+})
 </script>
 <script type="text/javascript" src="https://webapi.amap.com/demos/js/liteToolbar.js"></script>
 </body>
-</html>'''
+</html>'''.format(redis1.get('provinces'))
 
 
 @app.route('/map', methods=['GET'])
