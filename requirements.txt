@@ -2,3 +2,5 @@ flask
 redis
 line-bot-sdk
 aiml
+bs4
+
