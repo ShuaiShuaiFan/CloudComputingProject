@@ -348,7 +348,7 @@ def handle_TextMessage(event):
                 "margin": "none"
                 "action": {{
                         "type": "uri",
-                         "uri": "{0[3]}
+                         "uri": "{0[3]}"
                           }}
               }},
               {{
