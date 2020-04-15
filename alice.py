@@ -277,7 +277,7 @@ def crawl_news(number=3):
 def handle_TextMessage(event):
     req = event.message.text
     if req.find('coronavirus map') > -1:
-        bubble_string= '''
+        bubble_string = '''
         {
   "type": "bubble",
   "hero": {
@@ -314,11 +314,11 @@ def handle_TextMessage(event):
             message
         )
     if req.find('coronavirus news') > -1:
-        nums=re.findall(r"\d+\.?\d*",req)
+        nums = re.findall(r"\d+\.?\d*", req)
         if len(nums) > 0:
             number = int(nums[0])
         else:
-            number=3
+            number = 3
         variables = crawl_news(number)
         new = '''
               {{
@@ -351,6 +351,10 @@ def handle_TextMessage(event):
                 "gravity": "center",
                 "flex": 2,
                 "margin": "none"
+                "action": {{
+                        "type": "uri",
+                         "uri": "{[3]}
+                          }}
               }},
               {{
                 "type": "text",
