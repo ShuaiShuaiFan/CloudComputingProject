@@ -493,7 +493,7 @@ def handle_location_message(event):
 
 # Handler function for File Message
 def handle_AudioMessage(event):
-    message_content = line_bot_api.get_message_content(event.message.id)
+    message_content = line_bot_api.get_message_content(event.message.id).content
     res = client.asr(
         message_content, 'm4a',
         16000, {
