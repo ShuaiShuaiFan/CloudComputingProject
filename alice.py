@@ -278,7 +278,7 @@ def handle_TextMessage(event):
     req = event.message.text
     if req.find('coronavirus map') > -1:
         bubble_string = '''
-        {
+{
   "type": "bubble",
   "hero": {
     "type": "image",
@@ -291,20 +291,15 @@ def handle_TextMessage(event):
       "uri": "https://https://healthcarer-project.herokuapp.com/map"
     }
   },
-  "body": {
+  "footer": {
     "type": "box",
     "layout": "vertical",
     "contents": [
       {
-        "type": "text",
-        "text": "  "
+        "type": "spacer",
+        "size": "xs"
       }
     ]
-  },
-  "styles": {
-    "header": {
-      "separator": true
-    }
   }
 }
         '''
@@ -353,7 +348,7 @@ def handle_TextMessage(event):
                 "margin": "none"
                 "action": {{
                         "type": "uri",
-                         "uri": "{[3]}
+                         "uri": "{0[3]}
                           }}
               }},
               {{
