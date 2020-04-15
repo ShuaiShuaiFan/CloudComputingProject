@@ -467,16 +467,15 @@ def handle_location_message(event):
 
 # Handler function for File Message
 def handle_AudioMessage(event):
-    audioUrl = event.message.originalContentUrl
-    # r = requests.get(audioUrl)
-    # res = client.asr(
-    #     r, 'm4a',
-    #     16000, {
-    #         'dev_pid': 1536,
-    #     })
+    message_content = line_bot_api.get_message_content(event.message.id)
+    res = client.asr(
+        message_content, 'm4a',
+        16000, {
+            'dev_pid': 1536,
+        })
     line_bot_api.reply_message(
         event.reply_token,
-        TextSendMessage(text=audioUrl )
+        TextSendMessage(text=str(res['result'] ))
     )
 
 

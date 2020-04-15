@@ -65,7 +65,6 @@ def get_locations():
         os.remove(my_file)
     return locations
 
-
 locations = get_locations()
 markers = []
 for item in locations:
