@@ -1,13 +1,14 @@
 from __future__ import unicode_literals
-
+import re
 import os
 import sys
 import redis
 import aiml
 import json
 from argparse import ArgumentParser
-
-
+import requests
+from bs4 import BeautifulSoup
+from aip.speech import AipSpeech
 from flask import Flask, request, abort, render_template
 from linebot import (
     LineBotApi, WebhookParser
@@ -21,17 +22,25 @@ from linebot.models import (RichMenu, RichMenuArea, RichMenuBounds, RichMenuSize
                             StickerMessage, StickerSendMessage,
                             BubbleContainer, TextComponent, BoxComponent, IconComponent, FlexSendMessage,
                             SpacerComponent, ButtonComponent, SeparatorComponent
-, ImageComponent, LocationMessage, LocationSendMessage,AudioMessage
+, ImageComponent, LocationMessage, LocationSendMessage, AudioMessage
                             )
 from linebot.utils import PY3
 
+# baidu-aip
+
+""" 你的 APPID AK SK """
+APP_ID = '11031096'
+API_KEY = 'Znj7ZUGi7HK93nDEGAXdzAjI'
+SECRET_KEY = '64c3e4a4ba912a4e0dde68fafbea127e'
 
 # 19430124 FAN Shuaishuai 's redis
 HOST = "redis-13670.c8.us-east-1-4.ec2.cloud.redislabs.com"
 PWD = "uOugljWUzWvmfoDuf6CRsonlrfUmYKSD"
 PORT = "13670"
 
-redis1 = redis.Redis(host=HOST, password=PWD, port=PORT,decode_responses=True)
+client = AipSpeech(APP_ID, API_KEY, SECRET_KEY)
+redis1 = redis.Redis(host=HOST, password=PWD, port=PORT, decode_responses=True)
+
 
 def get_module_dir(name):
     path = getattr(sys.modules[name], '__file__', None)
@@ -226,49 +235,56 @@ map = '''
 def hello_world():
     return map
 
-def crawl_news():
-    pass
+
+def crawl_news(number=3):
+    head = {
+        "accept": "text/html, */*; q=0.01",
+        "accept-encoding": "gzip, deflate, br",
+        "accept-language": "en-HK,en;q=0.9,zh-HK;q=0.8,zh-CN;q=0.7,zh;q=0.6,en-US;q=0.5",
+        'referer': 'https://www.news.gov.hk/chi/categories/covid19/index.html',
+        'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.100 Safari/537.36',
+    }
+    params = {
+        'language': 'chi',
+        'category': 'covid19',
+        'max': number,
+        'returnCnt': '100',
+
+    }
+
+    page = 'https://www.news.gov.hk/jsp/customSortNewsArticle.jsp'
+
+    s = requests.Session()
+    s.get(page, headers=head)
+    s.headers.update(head)
+    r = s.get(page, params=params)
+    # print(r)
+
+    soup = BeautifulSoup(r.text, 'xml')
+    items = soup.find_all('item')
+    # print(r.text)
+    news = []
+    for item in items:
+        title = item.find('title').text
+        img_url = 'https://www.news.gov.hk' + item.find('landingPagePreviewImage').text
+        summary = item.find('articleSummary').text
+        article_url = 'https://www.news.gov.hk' + item.find('generateHtmlPath').text
+        news.append([title, img_url, summary, article_url])
+    return news
+
 
 # Handler function for Text Message
 def handle_TextMessage(event):
     req = event.message.text
-    if req == 'coronavirus hk':
-        s1,s2= crawl_news()
-        bubble_string = """
-{{
-  "type": "bubble",
-  "hero": {{
-    "type": "image",
-    "url": "https://inews.gtimg.com/newsapp_bt/0/11308840372/1000",
-    "size": "full",
-    "aspectRatio": "20:13",
-    "aspectMode": "cover",
-    "action": {{
-      "type": "uri",
-      "uri": "https://https://healthcarer-project.herokuapp.com/map"
-    }}
-  }},
-  "body": {{
-    "type": "box",
-    "layout": "vertical",
-    "contents": [
-      {{
-        "type": "separator",
-        "color": "#84817b"
-      }},
-      {{
-        "type": "text",
-        "text": "2019香港冠狀病毒病新闻",
-        "align": "center",
-        "weight": "bold",
-        "size": "xl"
-      }},
-      {{
-        "type": "separator",
-        "color": "#84817b",
-        "margin": "none"
-      }},
-      {{
+    if req.find('coronavirus news') > 0:
+        nums=re.findall(r"\d+\.?\d*",req)
+        if len(nums) > 0:
+            number = nums[0]
+        else:
+            number=3
+        variables = crawl_news(number)
+        new = '''
+              {{
         "type": "box",
         "layout": "vertical",
         "contents": [
@@ -310,70 +326,7 @@ def handle_TextMessage(event):
                 "action": {{
                   "type": "uri",
                   "label": "action",
-                  "uri": "{0[3]}"
-                }},
-                "flex": 5,
-                "weight": "regular",
-                "margin": "xs",
-                "wrap": true,
-                "color": "#84817b"
-              }}
-            ]
-          }},
-          {{
-            "type": "separator",
-            "margin": "md"
-          }},
-          {{
-            "type": "separator",
-            "margin": "md"
-          }}
-        ],
-        "margin": "md"
-      }},
-      {{
-        "type": "box",
-        "layout": "vertical",
-        "contents": [
-          {{
-            "type": "box",
-            "layout": "vertical",
-            "contents": [
-              {{
-                "type": "text",
-                "text": "{1[0]}",
-                "weight": "bold"
-              }}
-            ]
-          }},
-          {{
-            "type": "box",
-            "layout": "horizontal",
-            "contents": [
-              {{
-                "type": "image",
-                "url": "{1[1]}",
-                "size": "sm",
-                "aspectRatio": "1.1:1.1",
-                "aspectMode": "cover",
-                "align": "start",
-                "position": "relative",
-                "gravity": "center",
-                "flex": 2,
-                "margin": "none"
-              }},
-              {{
-                "type": "text",
-                "text": "{1[2]}",
-                "align": "start",
-                "size": "xxs",
-                "style": "normal",
-                "gravity": "top",
-                "position": "relative",
-                "action": {{
-                  "type": "uri",
-                  "label": "action",
-                  "uri": "1[3]"
+                  "uri": "0[3]"
                 }},
                 "flex": 5,
                 "weight": "regular",
@@ -392,7 +345,47 @@ def handle_TextMessage(event):
             "margin": "md"
           }}
         ]
+      }},'''
+        news = ""
+        for i in variables:
+            new = new.format(i)
+            news += new
+
+        bubble_string = """
+{{
+  "type": "bubble",
+  "hero": {{
+    "type": "image",
+    "url": "https://inews.gtimg.com/newsapp_bt/0/11308840372/1000",
+    "size": "full",
+    "aspectRatio": "20:13",
+    "aspectMode": "cover",
+    "action": {{
+      "type": "uri",
+      "uri": "https://https://healthcarer-project.herokuapp.com/map"
+    }}
+  }},
+  "body": {{
+    "type": "box",
+    "layout": "vertical",
+    "contents": [
+      {{
+        "type": "separator",
+        "color": "#84817b"
       }},
+      {{
+        "type": "text",
+        "text": "2019香港冠狀病毒病新闻",
+        "align": "center",
+        "weight": "bold",
+        "size": "xl"
+      }},
+      {{
+        "type": "separator",
+        "color": "#84817b",
+        "margin": "none"
+      }},
+     {0}
       {{
         "type": "button",
         "action": {{
@@ -413,7 +406,7 @@ def handle_TextMessage(event):
     }}
   }}
 }}
-""".format()
+""".format(news)
         message = FlexSendMessage(alt_text="hello", contents=json.loads(bubble_string))
         line_bot_api.reply_message(
             event.reply_token,
@@ -470,13 +463,22 @@ def handle_location_message(event):
             latitude=event.message.latitude, longitude=event.message.longitude
         )
     )
+
+
 # Handler function for File Message
 def handle_AudioMessage(event):
-    audio=event.
+    audioUrl = event.message.originalContentUrl
+    # r = requests.get(audioUrl)
+    # res = client.asr(
+    #     r, 'm4a',
+    #     16000, {
+    #         'dev_pid': 1536,
+    #     })
     line_bot_api.reply_message(
         event.reply_token,
-        TextSendMessage(text="Nice file!")
+        TextSendMessage(text=audioUrl )
     )
+
 
 if __name__ == "__main__":
     arg_parser = ArgumentParser(
