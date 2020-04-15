@@ -345,7 +345,7 @@ def handle_TextMessage(event):
                 "position": "relative",
                 "gravity": "center",
                 "flex": 2,
-                "margin": "none"
+                "margin": "none",
                 "action": {{
                         "type": "uri",
                          "uri": "{0[3]}"
