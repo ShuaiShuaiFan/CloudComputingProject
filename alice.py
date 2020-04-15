@@ -501,7 +501,7 @@ def handle_AudioMessage(event):
         })
     line_bot_api.reply_message(
         event.reply_token,
-        TextSendMessage(text=str(res['result'] ))
+        TextSendMessage(text=alice.respond(res['result'][0]))
     )
 
 
