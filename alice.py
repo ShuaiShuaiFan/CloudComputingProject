@@ -21,7 +21,7 @@ from linebot.models import (RichMenu, RichMenuArea, RichMenuBounds, RichMenuSize
                             StickerMessage, StickerSendMessage,
                             BubbleContainer, TextComponent, BoxComponent, IconComponent, FlexSendMessage,
                             SpacerComponent, ButtonComponent, SeparatorComponent
-, ImageComponent, LocationMessage, LocationSendMessage
+, ImageComponent, LocationMessage, LocationSendMessage,AudioMessage
                             )
 from linebot.utils import PY3
 
@@ -103,6 +103,8 @@ def callback():
             handle_ImageMessage(event)
         if isinstance(event.message, VideoMessage):
             handle_VideoMessage(event)
+        if isinstance(event.message, AudioMessage):
+            handle_AudioMessage(event)
         if isinstance(event.message, FileMessage):
             handle_FileMessage(event)
         if isinstance(event.message, StickerMessage):
@@ -141,7 +143,7 @@ map = '''
             background-color: rgba(255, 0, 0, 0.1)
         }}
     </style>
-    <title>Marker example</title>
+    <title>Confirmed COVID-19s in past 14 days</title>
 </head>
 <body>
 <div id="container" tabindex="0"></div>
@@ -224,153 +226,194 @@ map = '''
 def hello_world():
     return map
 
+def crawl_news():
+    pass
 
 # Handler function for Text Message
 def handle_TextMessage(event):
     req = event.message.text
-    if req == 'map':
-        bubble_string = """{
+    if req == 'coronavirus hk':
+        s1,s2= crawl_news()
+        bubble_string = """
+{{
   "type": "bubble",
-  "hero": {
+  "hero": {{
     "type": "image",
     "url": "https://inews.gtimg.com/newsapp_bt/0/11308840372/1000",
     "size": "full",
     "aspectRatio": "20:13",
     "aspectMode": "cover",
-    "action": {
+    "action": {{
       "type": "uri",
-      "uri": "https://z.cbndata.com/2019-nCoV/index.html"
-    }
-  },
-  "body": {
+      "uri": "https://https://healthcarer-project.herokuapp.com/map"
+    }}
+  }},
+  "body": {{
     "type": "box",
     "layout": "vertical",
     "contents": [
-      {
+      {{
         "type": "separator",
+        "color": "#84817b"
+      }},
+      {{
+        "type": "text",
+        "text": "2019香港冠狀病毒病新闻",
+        "align": "center",
+        "weight": "bold",
+        "size": "xl"
+      }},
+      {{
+        "type": "separator",
+        "color": "#84817b",
         "margin": "none"
-      },
-      {
+      }},
+      {{
         "type": "box",
-        "layout": "horizontal",
+        "layout": "vertical",
         "contents": [
-          {
-            "type": "image",
-            "url": "https://scdn.line-apps.com/n/channel_devcenter/img/fx/01_1_cafe.png",
-            "size": "xs",
-            "aspectRatio": "1:1",
-            "aspectMode": "cover",
-            "align": "start",
-            "position": "relative",
-            "gravity": "center",
-            "flex": 2
-          },
-          {
-            "type": "text",
-            "text": "内地流感情况",
-            "align": "start",
-            "size": "md",
-            "style": "normal",
-            "gravity": "center",
-            "position": "relative",
-            "action": {
-              "type": "uri",
-              "label": "action",
-              "uri": "https://healthcarer-project.herokuapp.com/map"
-            },
-            "flex": 5
-          }
-        ]
-      },
-      {
-        "type": "separator"
-      },
-      {
-        "type": "separator",
+          {{
+            "type": "box",
+            "layout": "vertical",
+            "contents": [
+              {{
+                "type": "text",
+                "text": "{0[0]}",
+                "weight": "bold"
+              }}
+            ]
+          }},
+          {{
+            "type": "box",
+            "layout": "horizontal",
+            "contents": [
+              {{
+                "type": "image",
+                "url": "{0[1]}",
+                "size": "sm",
+                "aspectRatio": "1.1:1.1",
+                "aspectMode": "cover",
+                "align": "start",
+                "position": "relative",
+                "gravity": "center",
+                "flex": 2,
+                "margin": "none"
+              }},
+              {{
+                "type": "text",
+                "text": "{0[2]}",
+                "align": "start",
+                "size": "xxs",
+                "style": "normal",
+                "gravity": "top",
+                "position": "relative",
+                "action": {{
+                  "type": "uri",
+                  "label": "action",
+                  "uri": "{0[3]}"
+                }},
+                "flex": 5,
+                "weight": "regular",
+                "margin": "xs",
+                "wrap": true,
+                "color": "#84817b"
+              }}
+            ]
+          }},
+          {{
+            "type": "separator",
+            "margin": "md"
+          }},
+          {{
+            "type": "separator",
+            "margin": "md"
+          }}
+        ],
         "margin": "md"
-      },
-      {
+      }},
+      {{
         "type": "box",
-        "layout": "horizontal",
+        "layout": "vertical",
         "contents": [
-          {
-            "type": "image",
-            "url": "https://scdn.line-apps.com/n/channel_devcenter/img/fx/01_1_cafe.png",
-            "size": "xs",
-            "aspectRatio": "1:1",
-            "aspectMode": "cover",
-            "align": "start",
-            "position": "relative",
-            "gravity": "center",
-            "flex": 2
-          },
-          {
-            "type": "text",
-            "text": "国际流感情况",
-            "align": "start",
-            "size": "md",
-            "style": "normal",
-            "gravity": "center",
-            "position": "relative",
-            "action": {
-              "type": "uri",
-              "label": "action",
-              "uri": "http://linecorp.com/"
-            },
-            "flex": 5
-          }
+          {{
+            "type": "box",
+            "layout": "vertical",
+            "contents": [
+              {{
+                "type": "text",
+                "text": "{1[0]}",
+                "weight": "bold"
+              }}
+            ]
+          }},
+          {{
+            "type": "box",
+            "layout": "horizontal",
+            "contents": [
+              {{
+                "type": "image",
+                "url": "{1[1]}",
+                "size": "sm",
+                "aspectRatio": "1.1:1.1",
+                "aspectMode": "cover",
+                "align": "start",
+                "position": "relative",
+                "gravity": "center",
+                "flex": 2,
+                "margin": "none"
+              }},
+              {{
+                "type": "text",
+                "text": "{1[2]}",
+                "align": "start",
+                "size": "xxs",
+                "style": "normal",
+                "gravity": "top",
+                "position": "relative",
+                "action": {{
+                  "type": "uri",
+                  "label": "action",
+                  "uri": "1[3]"
+                }},
+                "flex": 5,
+                "weight": "regular",
+                "margin": "xs",
+                "wrap": true,
+                "color": "#84817b"
+              }}
+            ]
+          }},
+          {{
+            "type": "separator",
+            "margin": "md"
+          }},
+          {{
+            "type": "separator",
+            "margin": "md"
+          }}
         ]
-      },
-      {
+      }},
+      {{
+        "type": "button",
+        "action": {{
+          "type": "uri",
+          "label": "更多",
+          "uri": "https://www.news.gov.hk/chi/categories/covid19/index.html"
+        }},
+        "style": "link"
+      }},
+      {{
         "type": "separator"
-      },
-      {
-        "type": "separator",
-        "margin": "md"
-      },
-      {
-        "type": "box",
-        "layout": "horizontal",
-        "contents": [
-          {
-            "type": "image",
-            "url": "https://scdn.line-apps.com/n/channel_devcenter/img/fx/01_1_cafe.png",
-            "size": "xs",
-            "aspectRatio": "1:1",
-            "aspectMode": "cover",
-            "align": "start",
-            "position": "relative",
-            "gravity": "center",
-            "flex": 2
-          },
-          {
-            "type": "text",
-            "text": "内地流感情况",
-            "align": "start",
-            "size": "md",
-            "style": "normal",
-            "gravity": "center",
-            "position": "relative",
-            "action": {
-              "type": "uri",
-              "label": "action",
-              "uri": "http://linecorp.com/"
-            },
-            "flex": 5
-          }
-        ]
-      },
-      {
-        "type": "separator"
-      }
+      }}
     ]
-  },
-  "styles": {
-    "header": {
+  }},
+  "styles": {{
+    "header": {{
       "separator": true
-    }
-  }
-}"""
+    }}
+  }}
+}}
+""".format()
         message = FlexSendMessage(alt_text="hello", contents=json.loads(bubble_string))
         line_bot_api.reply_message(
             event.reply_token,
@@ -427,7 +470,13 @@ def handle_location_message(event):
             latitude=event.message.latitude, longitude=event.message.longitude
         )
     )
-
+# Handler function for File Message
+def handle_AudioMessage(event):
+    audio=event.
+    line_bot_api.reply_message(
+        event.reply_token,
+        TextSendMessage(text="Nice file!")
+    )
 
 if __name__ == "__main__":
     arg_parser = ArgumentParser(
