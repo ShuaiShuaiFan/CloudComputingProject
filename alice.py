@@ -127,19 +127,19 @@ map = '''
     <meta http-equiv="X-UA-Compatible" content="chrome=1">
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no, width=device-width">
     <style type="text/css">
-        body, html, #container {
+        body, html, #container {{
             height: 100%;
             margin: 0px;
             font: 12px Arial;
-        }
+        }}
 
-        .taiwan {
+        .taiwan {{
             border: solid 1px red;
             color: red;
             float: left;
             width: 50px;
             background-color: rgba(255, 0, 0, 0.1)
-        }
+        }}
     </style>
     <title>Marker example</title>
 </head>
@@ -149,46 +149,46 @@ map = '''
 <script src="https://webapi.amap.com/maps?v=1.4.15&key=999bd05545f336fce91acad15209da89"></script>
 <script type="text/javascript">
 
-    var map = new AMap.Map('container', {resizeEnable: true, zoom: 4});
+    var map = new AMap.Map('container', {{resizeEnable: true, zoom: 4}});
     var markers = []; //province见Demo引用的JS文件
-    var provinces={0}
-    for (var i = 0; i < provinces.length; i += 1) {
+    var provinces= {0}
+    for (var i = 0; i < provinces.length; i += 1) {{
         var marker;
-        if (provinces[i].type === 0) {
-            var icon = new AMap.Icon({
+        if (provinces[i].type === 0) {{
+            var icon = new AMap.Icon({{
                 image: 'https://webapi.amap.com/theme/v1.3/markers/n/mark_rs.png',
                 size: new AMap.Size(24, 34)
-            });
-            marker = new AMap.Marker({
+            }});
+            marker = new AMap.Marker({{
                 icon: icon,
                 position: provinces[i].center.split(','),
                 offset: new AMap.Pixel(-12, -12),
                 zIndex: 101,
                 title: provinces[i].name,
                 map: map
-            });
-        } else {
-            marker = new AMap.Marker({
+            }});
+        }} else {{
+            marker = new AMap.Marker({{
                 position: provinces[i].center.split(','),
                 title: provinces[i].name,
                 map: map
-            });
-            if (provinces[i].type === 2) {
+            }});
+            if (provinces[i].type === 2) {{
                 var content = "<div class = 'taiwan'>宝岛台湾</div>";
-                baodao = new AMap.Marker({
+                baodao = new AMap.Marker({{
                     content: content,
                     position: provinces[i].center.split(','),
                     title: provinces[i].name,
                     offset: new AMap.Pixel(0, 0),
                     map: map
-                });
-            }
-        }
+                }});
+            }}
+        }}
         markers.push(marker);
-    }
+    }}
     map.setFitView();
-    AMap.plugin('AMap.Geolocation', function() {
-  var geolocation = new AMap.Geolocation({
+    AMap.plugin('AMap.Geolocation', function() {{
+  var geolocation = new AMap.Geolocation({{
     // 是否使用高精度定位，默认：true
     enableHighAccuracy: true,
     // 设置定位超时时间，默认：无穷大
@@ -199,21 +199,21 @@ map = '''
     zoomToAccuracy: true,     
     //  定位按钮的排放位置,  RB表示右下
     buttonPosition: 'RB'
-  })
+  }})
 
   geolocation.getCurrentPosition()
   map.addControl(geolocation)
   AMap.event.addListener(geolocation, 'complete', onComplete)
   AMap.event.addListener(geolocation, 'error', onError)
 
-  function onComplete (data) {
+  function onComplete (data) {{
     // data是具体的定位信息
-  }
+  }}
 
-  function onError (data) {
+  function onError (data) {{
     // 定位出错
-  }
-})
+  }}
+}})
 </script>
 <script type="text/javascript" src="https://webapi.amap.com/demos/js/liteToolbar.js"></script>
 </body>
