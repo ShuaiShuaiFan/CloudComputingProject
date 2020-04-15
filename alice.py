@@ -276,6 +276,43 @@ def crawl_news(number=3):
 # Handler function for Text Message
 def handle_TextMessage(event):
     req = event.message.text
+    if req.find('coronavirus map') > -1:
+        bubble_string= '''
+        {
+  "type": "bubble",
+  "hero": {
+    "type": "image",
+    "url": "https://inews.gtimg.com/newsapp_bt/0/11308840372/1000",
+    "size": "full",
+    "aspectRatio": "20:13",
+    "aspectMode": "cover",
+    "action": {
+      "type": "uri",
+      "uri": "https://https://healthcarer-project.herokuapp.com/map"
+    }
+  },
+  "body": {
+    "type": "box",
+    "layout": "vertical",
+    "contents": [
+      {
+        "type": "text",
+        "text": "  "
+      }
+    ]
+  },
+  "styles": {
+    "header": {
+      "separator": true
+    }
+  }
+}
+        '''
+        message = FlexSendMessage(alt_text="hello", contents=json.loads(bubble_string))
+        line_bot_api.reply_message(
+            event.reply_token,
+            message
+        )
     if req.find('coronavirus news') > -1:
         nums=re.findall(r"\d+\.?\d*",req)
         if len(nums) > 0:
@@ -354,17 +391,6 @@ def handle_TextMessage(event):
         bubble_string = """
 {{
   "type": "bubble",
-  "hero": {{
-    "type": "image",
-    "url": "https://inews.gtimg.com/newsapp_bt/0/11308840372/1000",
-    "size": "full",
-    "aspectRatio": "20:13",
-    "aspectMode": "cover",
-    "action": {{
-      "type": "uri",
-      "uri": "https://https://healthcarer-project.herokuapp.com/map"
-    }}
-  }},
   "body": {{
     "type": "box",
     "layout": "vertical",
