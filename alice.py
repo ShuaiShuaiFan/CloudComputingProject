@@ -279,7 +279,7 @@ def handle_TextMessage(event):
     if req.find('coronavirus news') > -1:
         nums=re.findall(r"\d+\.?\d*",req)
         if len(nums) > 0:
-            number = nums[0]
+            number = int(nums[0])
         else:
             number=3
         variables = crawl_news(number)
