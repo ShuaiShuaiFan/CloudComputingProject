@@ -74,6 +74,8 @@ for item in locations:
         continue
     markers.append({"name": item, "center": location, "type": 0, "subDistricts": []})
 print('process done')
-redis1 = redis.Redis(host=HOST, password=PWD, port=PORT)
+redis1 = redis.Redis(host=HOST, password=PWD, port=PORT,decode_responses=True)
 redis1.set('provinces', str(markers))
 print('save redis done')
+
+

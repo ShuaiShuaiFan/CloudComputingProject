@@ -31,7 +31,7 @@ HOST = "redis-13670.c8.us-east-1-4.ec2.cloud.redislabs.com"
 PWD = "uOugljWUzWvmfoDuf6CRsonlrfUmYKSD"
 PORT = "13670"
 
-redis1 = redis.Redis(host=HOST, password=PWD, port=PORT)
+redis1 = redis.Redis(host=HOST, password=PWD, port=PORT,decode_responses=True)
 
 def get_module_dir(name):
     path = getattr(sys.modules[name], '__file__', None)
