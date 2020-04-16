@@ -130,7 +130,6 @@ def callback():
 
 
 map = '''
-
 <!doctype html>
 <html lang="en">
 <head>
@@ -498,7 +497,7 @@ def handle_AudioMessage(event):
         16000, {
             'dev_pid': 1737,
         })
-    if res.has_key('result'):
+    if 'result' in res.keys():
         text=alice.respond(res['result'][0])
     else:
         text='I beg your pardon'
