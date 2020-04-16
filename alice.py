@@ -498,9 +498,14 @@ def handle_AudioMessage(event):
         16000, {
             'dev_pid': 1737,
         })
+    if res.has_key('result'):
+        text=alice.respond(res['result'][0])
+    else:
+        text='I beg your pardon'
     line_bot_api.reply_message(
         event.reply_token,
-        TextSendMessage(text=alice.respond(res['result'][0]))
+
+            TextSendMessage(text=text)
     )
 
 
