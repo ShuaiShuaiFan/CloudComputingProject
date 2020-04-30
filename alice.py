@@ -26,7 +26,7 @@ from linebot.models import (RichMenu, RichMenuArea, RichMenuBounds, RichMenuSize
                             )
 from linebot.utils import PY3
 
-# baidu-aip
+# baidu-aip for audio recognize
 
 """ 你的 APPID AK SK """
 APP_ID = '11031096'
@@ -43,10 +43,97 @@ redis1 = redis.Redis(host=HOST, password=PWD, port=PORT, decode_responses=True)
 
 
 def get_module_dir(name):
+    '''
+    get alice module
+    :param name:
+    :return:
+    '''
     path = getattr(sys.modules[name], '__file__', None)
     if not path:
         raise AttributeError('module %s has not attribute __file__' % name)
     return os.path.dirname(os.path.abspath(path))
+
+def crawl_news(number=3):
+    '''
+    crawl covid-19 news from Hong Kong gov
+    :param number:
+    :return:
+    '''
+    head = {
+        "accept": "text/html, */*; q=0.01",
+        "accept-encoding": "gzip, deflate, br",
+        "accept-language": "en-HK,en;q=0.9,zh-HK;q=0.8,zh-CN;q=0.7,zh;q=0.6,en-US;q=0.5",
+        'referer': 'https://www.news.gov.hk/chi/categories/covid19/index.html',
+        'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.100 Safari/537.36',
+    }
+    params = {
+        'language': 'chi',
+        'category': 'covid19',
+        'max': number,
+        'returnCnt': '100',
+
+    }
+
+    page = 'https://www.news.gov.hk/jsp/customSortNewsArticle.jsp'
+
+    s = requests.Session()
+    s.get(page, headers=head)
+    s.headers.update(head)
+    r = s.get(page, params=params)
+    # print(r)
+
+    soup = BeautifulSoup(r.text, 'xml')
+    items = soup.find_all('item')
+    # print(r.text)
+    news = []
+    for item in items:
+        title = item.find('title').text
+        img_url = 'https://www.news.gov.hk' + item.find('landingPagePreviewImage').text
+        summary = item.find('articleSummary').text
+        article_url = 'https://www.news.gov.hk' + item.find('generateHtmlPath').text
+        news.append([title, img_url, summary, article_url])
+    return news
+
+
+def crawl_qa(page='https://www.who.int/news-room/q-a-detail/q-a-coronaviruses'):
+    '''
+    crawl covid-19 questions and answers from WHO website
+    :param page:
+    :return:
+    '''
+    r = requests.get(page)
+    # print(r.text)
+    soup = BeautifulSoup(r.text)
+    items = soup.find_all(name='div', class_='sf-accordion__panel')
+    qa = []
+
+    for i in items:
+        qa_dic = {'q': '', 'a': ''}
+        q = i.find(name='a', class_='sf-accordion__link').text.strip().replace('?', '').upper()
+        q = '<category><pattern>' + q + '</pattern>\n'
+        a = i.find_all(name='p')[-1].get_text(strip=True)
+        a = a.replace(u'/xa0', u'')
+        q = q.replace(u'/xa0', u'')
+        print(a)
+        a = '<template>' + a + '</template>\n</category>\n'
+        qa_dic['q'] = q
+        qa_dic['a'] = a
+        qa.append(qa_dic)
+    texts_list = [i['q'] + i['a'] for i in qa]
+    text = ''.join(texts_list)
+    return text
+
+
+def generate_aiml(name='covid'):
+    '''
+    generate aiml file by crawled data
+    :param name:
+    :return:
+    '''
+    text = crawl_qa()
+    aiml_ = '<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<aiml version=\"1.0\">\n' + text + '</aiml>\n'
+    with open(name + '.aiml', 'w', encoding='UTF-8-sig') as f:
+        f.write(aiml_)
 
 
 print(os.path.abspath('../templates'))
@@ -55,6 +142,7 @@ app = Flask(__name__, template_folder=os.path.abspath('../templates'))
 alice_path = get_module_dir('aiml') + '/botdata/alice'
 # 切换到语料库所在工作目录
 os.chdir(alice_path)
+generate_aiml()
 alice = aiml.Kernel()
 alice.learn("startup.xml")
 alice.respond('LOAD ALICE')
@@ -75,17 +163,6 @@ if channel_access_token is None:
 
 line_bot_api = LineBotApi(channel_access_token)
 parser = WebhookParser(channel_secret)
-rich_menu_to_create = RichMenu(
-    size=RichMenuSize(width=2500, height=843),
-    selected=False,
-    name="Nice richmenu",
-    chat_bar_text="Tap here",
-    areas=[RichMenuArea(
-        bounds=RichMenuBounds(x=0, y=0, width=2500, height=843),
-        action=URIAction(label='Go to line.me', uri='https://line.me'))]
-)
-rich_menu_id = line_bot_api.create_rich_menu(rich_menu=rich_menu_to_create)
-print(rich_menu_id)
 
 
 @app.route("/callback", methods=['POST'])
@@ -234,71 +311,115 @@ map = '''
 def hello_world():
     return map
 
-
-def crawl_news(number=3):
-    head = {
-        "accept": "text/html, */*; q=0.01",
-        "accept-encoding": "gzip, deflate, br",
-        "accept-language": "en-HK,en;q=0.9,zh-HK;q=0.8,zh-CN;q=0.7,zh;q=0.6,en-US;q=0.5",
-        'referer': 'https://www.news.gov.hk/chi/categories/covid19/index.html',
-        'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.100 Safari/537.36',
-    }
-    params = {
-        'language': 'chi',
-        'category': 'covid19',
-        'max': number,
-        'returnCnt': '100',
-
-    }
-
-    page = 'https://www.news.gov.hk/jsp/customSortNewsArticle.jsp'
-
-    s = requests.Session()
-    s.get(page, headers=head)
-    s.headers.update(head)
-    r = s.get(page, params=params)
-    # print(r)
-
-    soup = BeautifulSoup(r.text, 'xml')
-    items = soup.find_all('item')
-    # print(r.text)
-    news = []
-    for item in items:
-        title = item.find('title').text
-        img_url = 'https://www.news.gov.hk' + item.find('landingPagePreviewImage').text
-        summary = item.find('articleSummary').text
-        article_url = 'https://www.news.gov.hk' + item.find('generateHtmlPath').text
-        news.append([title, img_url, summary, article_url])
-    return news
-
-
 # Handler function for Text Message
 def handle_TextMessage(event):
     req = event.message.text
-    if req.find('coronavirus map') > -1:
+    if req.find('covid-19 map') > -1:
         bubble_string = '''
-{
+{{
   "type": "bubble",
-  "hero": {
-    "type": "image",
-    "url": "https://inews.gtimg.com/newsapp_bt/0/11308840372/1000",
-    "size": "full",
-    "aspectRatio": "20:13",
-    "aspectMode": "cover",
-    "action": {
-      "type": "uri",
-      "uri": "https://healthcarer-project.herokuapp.com/map"
-    }
-  },
-  "footer": {
+  "body": {
     "type": "box",
     "layout": "vertical",
     "contents": [
       {
-        "type": "spacer",
-        "size": "xs"
+        "type": "box",
+        "layout": "horizontal",
+        "contents": [
+          {
+            "type": "image",
+            "url": "https://www.marxist.com/images/cache/db91d266ec83a509da6989b2ca3623b4_w780_h439.JPG",
+            "size": "full",
+            "aspectMode": "cover",
+            "aspectRatio": "780:439",
+            "gravity": "bottom",
+            "flex": 1,
+            "position": "relative",
+            "action": {
+              "type": "uri",
+              "label": "action",
+              "uri": "https://healthcarer-project.herokuapp.com/map"
+            }
+          }
+        ]
+      },
+      {
+        "type": "box",
+        "layout": "horizontal",
+        "contents": [
+          {
+            "type": "box",
+            "layout": "vertical",
+            "contents": [
+              {
+                "type": "image",
+                "url": "https://image.shutterstock.com/image-vector/hong-kong-city-line-art-260nw-609758045.jpg",
+                "aspectMode": "cover",
+                "size": "full"
+              }
+            ],
+            "cornerRadius": "100px",
+            "width": "72px",
+            "height": "72px"
+          },
+          {
+            "type": "box",
+            "layout": "vertical",
+            "contents": [
+              {
+                "type": "text",
+                "contents": [
+                  {
+                    "type": "span",
+                    "text": "周邊疫情信息查詢",
+                    "weight": "bold",
+                    "color": "#000000",
+                    "size": "lg"
+                  }
+                ],
+                "size": "sm",
+                "wrap": true,
+                "action": {
+                  "type": "uri",
+                  "label": "action",
+                  "uri": "https://healthcarer-project.herokuapp.com/map"
+                }
+              },
+              {
+                "type": "box",
+                "layout": "baseline",
+                "contents": [
+                  {
+                    "type": "text",
+                    "size": "md",
+                    "color": "#bcbcbc",
+                    "text": "coronavirus map",
+                    "contents": [
+                      {
+                        "type": "span",
+                        "text": "coronavirus map"
+                      }
+                    ],
+                    "style": "italic",
+                    "decoration": "underline",
+                    "position": "relative"
+                  }
+                ],
+                "spacing": "sm",
+                "margin": "md"
+              },
+              {
+                "type": "text",
+                "text": "防疫地圖"
+              }
+            ]
+          }
+        ],
+        "spacing": "xl",
+        "paddingAll": "20px"
       }
-    ]
+    ],
+    "paddingAll": "0px"
   }
 }
         '''
@@ -307,7 +428,7 @@ def handle_TextMessage(event):
             event.reply_token,
             message
         )
-    if req.find('coronavirus news') > -1:
+    if req.find('covid-19 news') > -1:
         nums = re.findall(r"\d+\.?\d*", req)
         if len(nums) > 0:
             number = int(nums[0])
@@ -399,7 +520,7 @@ def handle_TextMessage(event):
       }},
       {{
         "type": "text",
-        "text": "2019香港冠狀病毒病新闻",
+        "text": "HK COVID-19 NEWS",
         "align": "center",
         "weight": "bold",
         "size": "xl"
@@ -498,13 +619,13 @@ def handle_AudioMessage(event):
             'dev_pid': 1737,
         })
     if 'result' in res.keys():
-        text=alice.respond(res['result'][0])
+        text = alice.respond(res['result'][0])
     else:
-        text='I beg your pardon'
+        text = 'I beg your pardon'
     line_bot_api.reply_message(
         event.reply_token,
 
-            TextSendMessage(text=text)
+        TextSendMessage(text=text)
     )
 
 

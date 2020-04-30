@@ -3,6 +3,7 @@ import pdfplumber
 import re
 import os
 import redis
+from bs4 import BeautifulSoup
 
 # 19430124 FAN Shuaishuai 's redis
 HOST = "redis-13670.c8.us-east-1-4.ec2.cloud.redislabs.com"
@@ -65,6 +66,10 @@ def get_locations():
         os.remove(my_file)
     return locations
 
+
+
+
+
 locations = get_locations()
 markers = []
 for item in locations:
@@ -73,7 +78,7 @@ for item in locations:
         continue
     markers.append({"name": item, "center": location, "type": 0, "subDistricts": []})
 print('process done')
-redis1 = redis.Redis(host=HOST, password=PWD, port=PORT,decode_responses=True)
+redis1 = redis.Redis(host=HOST, password=PWD, port=PORT, decode_responses=True)
 redis1.set('provinces', str(markers))
 print('save redis done')
 
