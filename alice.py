@@ -53,6 +53,7 @@ def get_module_dir(name):
         raise AttributeError('module %s has not attribute __file__' % name)
     return os.path.dirname(os.path.abspath(path))
 
+
 def crawl_news(number=3):
     '''
     crawl covid-19 news from Hong Kong gov
@@ -311,12 +312,13 @@ map = '''
 def hello_world():
     return map
 
+
 # Handler function for Text Message
 def handle_TextMessage(event):
     req = event.message.text
     if req.find('covid-19 map') > -1:
         bubble_string = '''
-{{
+{
   "type": "bubble",
   "body": {
     "type": "box",
