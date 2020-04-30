@@ -113,9 +113,7 @@ def crawl_qa(page='https://www.who.int/news-room/q-a-detail/q-a-coronaviruses'):
         q = i.find(name='a', class_='sf-accordion__link').text.strip().replace('?', '').upper()
         q = '<category><pattern>' + q + '</pattern>\n'
         a = i.find_all(name='p')[-1].get_text(strip=True)
-        a = a.replace(u'/xa0', u'')
-        q = q.replace(u'/xa0', u'')
-        print(a)
+        q=q.replace('-','')
         a = '<template>' + a + '</template>\n</category>\n'
         qa_dic['q'] = q
         qa_dic['a'] = a
@@ -316,7 +314,7 @@ def hello_world():
 # Handler function for Text Message
 def handle_TextMessage(event):
     req = event.message.text
-    if req.find('covid-19 map') > -1:
+    if req.upper().find('COVID-19 MAP') > -1:
         bubble_string = '''
 {
   "type": "bubble",
@@ -430,7 +428,7 @@ def handle_TextMessage(event):
             event.reply_token,
             message
         )
-    if req.find('covid-19 news') > -1:
+    if req.upper().find('COVID-19 NEWS') > -1:
         num = req.split()[0]
         if num.isdigit():
             number = int(num)
